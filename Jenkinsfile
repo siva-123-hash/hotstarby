@@ -56,14 +56,18 @@ pipeline {
         stage('Deploy to Docker Swarm') {
             steps {
                 script {
-                    sh '''
-                    docker service rm myapp-service || true
-                    docker service create \
-                        --name myapp-service \
-                        --publish 8082:8080 \
-                        --replicas 5 \
-                        ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
+                        // Check if swarm is active, otherwise initialize
+            def swarmCheck = sh(script: "docker info --format '{{.Swarm.LocalNodeState}}'", returnStdout: true).trim()
+            if (swarmCheck != "active") {
+                echo "Docker Swarm not initialized. Initializing now..."
+                sh 'docker swarm init || true'
+            }
+
+            // Remove old service if exists
+            sh 'docker service rm myapp-service || true'
+
+            // Deploy new service
+            sh 'docker service create --name myapp-service --publish 8082:8080 --replicas 5 siva0927/myapp:v1'
                 }
             }
         }
