@@ -45,7 +45,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker rm -f myapp-cont || true'
-                    sh 'docker run -d --name myapp-cont -p 8081:8080 ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}'
+                    sh 'docker run -d --name myapp-cont -p 8082:8080 ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}'
 
                     // ✅ Show container logs in Jenkins console
                     sh 'sleep 5 && docker logs myapp-cont'
@@ -60,7 +60,7 @@ pipeline {
                     docker service rm myapp-service || true
                     docker service create \
                         --name myapp-service \
-                        --publish 8081:8080 \
+                        --publish 8082:8080 \
                         --replicas 5 \
                         ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
                     '''
